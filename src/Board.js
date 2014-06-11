@@ -24,6 +24,15 @@
       }, this);
     },
 
+    cols: function() {
+      var rows = this.rows();
+      var storage = [];
+      for (var i=0; i<rows[0].length; i++) {
+        storage.push(_.pluck(rows, i));
+      }
+      return storage;
+    },
+
     togglePiece: function(rowIndex, colIndex) {
       this.get(rowIndex)[colIndex] = + !this.get(rowIndex)[colIndex];
       this.trigger('change');
@@ -79,11 +88,33 @@
     //
     // test if a specific row on this board contains a conflict
     hasRowConflictAt: function(rowIndex) {
+      var counter = 0;
+      var row = this.rows()[rowIndex];
+      // iterating over a single row
+      for (var i = 0; i < row.length; i++ ){
+        // check for pieces
+        if (row[i] === 1){
+          counter++;
+        }
+      }
+      // if there's more than one piece
+      if (counter > 1) {
+        return true;
+      }
       return false; // fixme
     },
 
     // test if any rows on this board contain conflicts
     hasAnyRowConflicts: function() {
+      // get the rows
+      var rows = this.rows();
+      // loop through rows
+      // check if there's a conflict
+      for (var i = 0; i < rows.length; i++){
+        if (this.hasRowConflictAt(i)){
+          return true;
+        }
+      }
       return false; // fixme
     },
 
@@ -94,13 +125,36 @@
     //
     // test if a specific column on this board contains a conflict
     hasColConflictAt: function(colIndex) {
+      //get column array
+      //iterate over array
+      //check for column conflict
+      var counter = 0;
+      var col = this.cols()[colIndex];
+      for (var i=0; i<col.length; i++) {
+        if (col[i] === 1) {
+          counter++;
+        }
+      }
+      if (counter > 1) {
+        return true;
+      }
       return false; // fixme
     },
 
     // test if any columns on this board contain conflicts
     hasAnyColConflicts: function() {
+      //get column array
+      //iterate over array
+      //check for column conflict
+      var cols = this.cols();
+      for (var i=0; i<cols.length; i++) {
+        if (this.hasColConflictAt(i)) {
+          return true;
+        }
+      }
       return false; // fixme
     },
+
 
 
 
