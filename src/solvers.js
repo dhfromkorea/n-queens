@@ -13,92 +13,69 @@
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n rooks placed such that none of them can attack each other
 
+// fucking how do I save all the solutions over the course of the whole the recursive call
 window.findNRooksSolution = function(n) {
-  var createBoard = function(n){
-    var board = [];
-    for (var i=0; i<n; i++) {
-      var row = [];
-      for (var j=0; j<n; j++) {
-        row.push(0);
-      }
-      board.push(row);
-    }
-    return board;
-  };
-
-  var solution = new Board(createBoard(n));
-  for (var i=0; i<n; i++) {
-      for (var j=0; j<n; j++) {
-        solution.togglePiece(j,i);
-        if(solution.hasAnyRooksConflicts()) {
-          solution.togglePiece(j,i);
+  // eliminated row or col check with the decision tree design itself
+  var board = new Board({n: n});
+  var result = [];
+  var remainingRows = _.range(0, n);
+  var arrCopy;
+  var searchSpots = function(colNum, remainingRows) {
+    for (var i = 0; i < remainingRows.length; i++) {
+      board.togglePiece(remainingRows[i], colNum);
+        if (colNum === (n - 1)) {
+          // console.log('Single solutions for ' + n + ' rooks:', JSON.stringify(board.rows()));
+          var temp = [];
+          for (var j = 0; j < board.rows().length; j++){
+            temp[j] = board.rows()[j].slice();
+          }
+          result.push(temp);
+        } else {
+          arrCopy = Array.prototype.slice.call(remainingRows);
+          arrCopy.splice(i,1);
+          searchSpots(colNum + 1, arrCopy);
         }
-      }
+      board.togglePiece(remainingRows[i], colNum);
     }
-  console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
-  return solution.rows();
-
+  };
+  searchSpots(0, remainingRows);
+  return result[0];
 };
+
 
 
 
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
-window.countNRooksSolutions = function(num) {
-  // var solutionCount = undefined; //fixme
-  // var root = [];
-  // if (num = 1) {
-
-  // }
-  // var depth = 3;
-  // var index = 3;
+window.countNRooksSolutions = function(n) {
+  // has rowconflict has O(n^2) time complexity (as it requires a double loop)
+var board = new Board({n: n});
+  var remainingRows = _.range(0, n);
   var solutionCount = 0;
-  //create empty board of nxn
-  var board = new Board({n:num});
-  //array of row position we can choose at each level
-  var rows = _.range(1, num+1);
-  //create function to call recursively
-  var findCombo = function(depth) {
-    for (var i=0; i<rows.length; i++) {
-      //toggle entire column, 1 at a time
-      board.togglePiece(i, depth);
-      if (!board.hasAnyRooksConflicts()) {
-        if(depth === num-1) {
+  var searchSpots = function(colNum, remainingRows) {
+    for (var i = 0; i < remainingRows.length; i++) {
+      board.togglePiece(remainingRows[i], colNum);
+        if (colNum === (n - 1)) {
+            // console.log('Single solutions for ' + n + ' rooks:', JSON.stringify(board.rows()));
           solutionCount++;
-        }else {
-          findCombo(depth+1);
+          } else {
+          arrCopy = Array.prototype.slice.call(remainingRows);
+          arrCopy.splice(i,1);
+          searchSpots(colNum + 1, arrCopy);
         }
-      }
-      //toggle column value
-      board.togglePiece(i, depth);
+      board.togglePiece(remainingRows[i], colNum);
     }
   };
-
-  findCombo(0);
-
-  console.log('Number of solutions for ' + num + ' rooks:', solutionCount);
+  searchSpots(0, remainingRows);
   return solutionCount;
 };
 
-  //base case: n levels of tree
-  //initial case: []
-  //common pattern: loop through all children, 1 through n
-
-  //function makeChildren, recursively called, pass in root and depth,
-  //then children and depth
-  //toggle
-  //when depth is zero stop
-
-
-
-
-
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
-  var createBoard = function(n){
+  var createBoard = function(n) {
     var board = [];
-    for (var i=0; i<n; i++) {
+    for (var i = 0; i < n; i++) {
       var row = [];
-      for (var j=0; j<n; j++) {
+      for (var j = 0; j < n; j++) {
         row.push(0);
       }
       board.push(row);
@@ -106,11 +83,11 @@ window.findNQueensSolution = function(n) {
     return board;
   };
   var solution = new Board(createBoard(n));
-  for (var i=0; i<n; i++) {
-    for (var j=0; j<n; j++) {
-      solution.togglePiece(j,i);
-      if(solution.hasAnyQueensConflicts()) {
-        solution.togglePiece(j,i);
+  for (var i = 0; i < n; i++) {
+    for (var j = 0; j < n; j++) {
+      solution.togglePiece(j, i);
+      if (solution.hasAnyQueensConflicts()) {
+        solution.togglePiece(j, i);
       }
     }
   }
@@ -121,35 +98,43 @@ window.findNQueensSolution = function(n) {
 
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
-window.countNQueensSolutions = function(num) {
-
+window.countNQueensSolutions = function(n) {
   var solutionCount = 0;
+  if (n === 0 || n === 1) {
+   // handle unusual base cases
+    solutionCount = 1;
+    return solutionCount;
+  }
   //create empty board of nxn
-  var board = new Board({n:num});
+  var board = new Board({n: n});
+  // will have access to the latest diagonal states
+  var remainingRows = _.range(0, n);
+  var diagIndex;
+  var arrCopy;
   //array of row position we can choose at each level
-  var rows = _.range(1, num+1);
   //create function to call recursively
-  var findCombo = function(depth) {
-    for (var i=0; i<rows.length; i++) {
-      //toggle entire column, 1 at a time
-      board.togglePiece(i, depth);
-      if (!board.hasAnyQueensConflicts()) {
-        if(depth === num-1) {
+  var searchMoves = function(colNum, remainingRows) {
+    for (var i = 0; i < remainingRows.length; i++) {
+      // as we're removing rows selected in the parent nodes
+      // we only check for diagonal conflicts
+      majorIndex = board._getFirstRowColumnIndexForMajorDiagonalOn(remainingRows[i], colNum);
+      minorIndex = board._getFirstRowColumnIndexForMinorDiagonalOn(remainingRows[i], colNum);
+      board.togglePiece(remainingRows[i], colNum);
+      if (!board.hasMajorDiagonalConflictAt(majorIndex) && !board.hasMinorDiagonalConflictAt(minorIndex)) {
+        if (colNum === n - 1) {
+          // console.log('Number of solutions for ' + n + ' queens:', board.rows());
           solutionCount++;
-        }else {
-          findCombo(depth+1);
+        } else {
+          // create a shallow copy to avoid value sharing 
+          arrCopy = remainingRows.slice();
+          // slice out the selected index  
+          arrCopy.splice(i, 1);
+          searchMoves(colNum + 1, arrCopy);
         }
       }
-      //toggle column value
-      board.togglePiece(i, depth);
+      board.togglePiece(remainingRows[i], colNum);
     }
   };
-
-  findCombo(0);
-  if (num === 0 || num === 1){
-    solutionCount = 1;
-  }
-  console.log('Number of solutions for ' + num + ' rooks:', solutionCount);
+  searchMoves(0, remainingRows);
   return solutionCount;
-
 };
