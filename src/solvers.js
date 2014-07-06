@@ -71,7 +71,7 @@ var board = new Board({n: n});
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
-  var createBoard = function(n) {
+  var createBoard = function(n) {w
     var board = [];
     for (var i = 0; i < n; i++) {
       var row = [];
@@ -92,7 +92,7 @@ window.findNQueensSolution = function(n) {
     }
   }
 
-  console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
+  console.log('Single solution for w' + n + ' queens:', JSON.stringify(solution));
   return solution.rows();
 };
 
